@@ -12,12 +12,12 @@ const dbo = require("../db/conn");
 const ObjectId = require("mongodb").ObjectId;
  
 // https://www.mongodb.com/community/forums/t/solved-mern-tutorial-issue-cannot-read-properties-of-undefined-reading-collection/212521/2
-gameRoutes.route("/targetNum").get(async function (req, response) {
+gameRoutes.route("/range").get(async function (req, response) {
     // let db_connect = dbo.getDb();
-    console.log("in beefpack");
-    let num = Math.floor(Math.random() * 51);
-    console.log("number is: ", num);
-    response.json({number: num});
+    // console.log("in beefpack");
+    let topnumber = Math.floor(Math.random() * 101) * 10;
+    // console.log("number is: ", num);
+    response.json({range: [0, topnumber]});
     // db_connect
     //     .collection("records")
     //     .find({})
