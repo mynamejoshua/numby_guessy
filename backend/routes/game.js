@@ -28,4 +28,38 @@ gameRoutes.route("/range").get(async function (req, response) {
   
 });
 
+// This section will help you create a new record.
+gameRoutes.route("/scores/add").post(function (req, response) {
+
+    let db_connect = dbo.getDb();
+   
+    let myobj = {
+      name: req.body.name,
+      timeTaken: req.body.timeTaken,
+      guesses: req.body.guesses,
+      guessRange: req.body.guessRange,
+    };
+   
+    db_connect.collection("scores").insertOne(myobj, function (err, res) {
+      if (err) throw err;
+      response.json(res);
+      console.log("added record");
+    });
+});
+
+gameRoutes.route("/scores").get(async function (req, response) {
+    let db_connect = dbo.getDb();
+    console.log("in beefpack");
+
+    db_connect
+        .collection("scores")
+        .find({})
+        .toArray()
+        .then((data) => {
+            response.json(data);
+        });
+  
+});
+
+
 module.exports = gameRoutes;
