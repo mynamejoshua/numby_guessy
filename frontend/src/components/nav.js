@@ -4,16 +4,18 @@ import React from "react";
 import { NavLink } from "react-router-dom";
  // Here, we display our Navbar
 
+
+// https://www.bitdegree.org/learn/html-tab
 export default function Navbar() {
     return (
-        <div>
-            Navbar goes here
-            <NavLink to="/"> to game </NavLink>
-            <NavLink to="/score">to score</NavLink>
-        </div>
+        <nav style={{display: "flex"}}>
+                <NavLink to="/">Home</NavLink><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <NavLink to="/game">Game</NavLink><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <NavLink to="/score">Score</NavLink>
+        </nav>
     )
 }
-
+{/* <span>&nbsp;&nbsp;&nbsp;&nbsp;</span> */}
 
 // export default function Navbar() {
 //  return (

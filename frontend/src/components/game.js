@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { NavLink, useLocation, useNavigate} from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
-async function fetchRange() {
+async function FetchRange() {
     let response = await fetch("http://localhost:5000/range");
     if (response.ok) {
         const data = await response.json();
@@ -12,22 +12,22 @@ async function fetchRange() {
     }
 }
 
-async function postScore(stats) {
-    const newScore = {...stats};
+async function PostScore(stats) {
+    const newScore = { ...stats };
     await fetch("http://localhost:5000/scores/add", {
         method: "POST",
         headers: {
-        "Content-Type": "application/json",
+            "Content-Type": "application/json",
         },
         body: JSON.stringify(newScore),
-   })
-   .catch(error => {
-        window.alert(error);
-        return;
-   });
+    })
+        .catch(error => {
+            window.alert(error);
+            return;
+        });
 }
 
-function GameStats({name, guesses, timeTaken, range }) {
+function GameStats({ name, guesses, timeTaken, range }) {
     return (
         <div>
             <h2>Game Stats</h2>
@@ -39,7 +39,7 @@ function GameStats({name, guesses, timeTaken, range }) {
     );
 }
 
-function MessageStack({messages}) {
+function MessageStack({ messages }) {
     return (
         <div className="message-stack">
             {messages.map((msg, index) => (
@@ -50,23 +50,21 @@ function MessageStack({messages}) {
 }
 
 export default function Game() {
-    const location = useLocation();
     const navigate = useNavigate();
-    const userName = location.state?.userName || null;
+    const userName = useLocation().state?.userName || null;
 
     // set up state
     const [guess, setGuess] = useState('');
     const [messages, setMessages] = useState([""]);
     const [targetNum, setTargetNum] = useState(0);
-    const [stats, setStats] = useState({guessRange: [0, 50], guesses: 0, initialTime: 0 , timeTaken: -1, gameOver: false});
+    const [stats, setStats] = useState({ guessRange: [0, 50], guesses: 0, initialTime: 0, timeTaken: -1, gameOver: false });
     const statsRef = useRef(stats);
 
-
     const handleReset = async () => {
-        let range = await fetchRange();
+        let range = await FetchRange();
         let targ = Math.floor(Math.random() * parseInt(range[1]));
 
-        setStats({guessRange: range, guesses: 0, initialTime: null, timeTaken: -1, gameOver: false});
+        setStats({ guessRange: range, guesses: 0, initialTime: null, timeTaken: -1, gameOver: false });
         setTargetNum(targ);
         setMessages(["".concat("Guess a number between ", range[0], " and ", range[1])]);
         setGuess('');
@@ -89,18 +87,19 @@ export default function Game() {
 
     const handleSubmit = (event) => { // might need async here
         event.preventDefault();
-        if(statsRef.current.gameOver === true) return;
-        if(!statsRef.current.initialTime) statsRef.current.initialTime = new Date(); // on first guess set inital time
+        if (statsRef.current.gameOver === true) return;
+        if (!statsRef.current.initialTime) statsRef.current.initialTime = new Date(); // on first guess set inital time
 
-        let updatedStats = {...statsRef.current};
+        let updatedStats = { ...statsRef.current };
         let message = "";
+        updatedStats.guesses += 1;
 
         console.log("guess:", guess);
         console.log("targ:", targetNum);
 
-        if (guess > targetNum ){
+        if (guess > targetNum) {
             message = "lower than " + guess;
-        } else if (guess < targetNum ) {
+        } else if (guess < targetNum) {
             message = "higher than " + guess;
         } else if (parseInt(guess) === targetNum) {
             message = "correct";
@@ -108,22 +107,21 @@ export default function Game() {
             updatedStats.timeTaken = (endTime - statsRef.current.initialTime) / 1000;
             updatedStats.gameOver = true;
             updatedStats.name = userName;
-            postScore(updatedStats);
+            PostScore(updatedStats);
         } else {
             return;
         }
 
         // update gamestate
-        updatedStats.guesses += 1;
         setStats(updatedStats);
-        setMessages([...messages, message]); 
-        setGuess(''); 
+        setMessages([...messages, message]);
+        setGuess('');
     };
 
     const renderGameOver = () => (
         <>
             <NavLink to="/score">LeaderBoard</NavLink>
-            <GameStats name={userName} guesses={stats.guesses} timeTaken={stats.timeTaken} range={stats.guessRange}/>
+            <GameStats name={userName} guesses={stats.guesses} timeTaken={stats.timeTaken} range={stats.guessRange} />
             <details><summary>message log</summary>
                 <MessageStack messages={messages} />
             </details>
@@ -134,11 +132,11 @@ export default function Game() {
     const renderGamePlay = () => (
         <>
             <form onSubmit={handleSubmit}>
-                <input 
-                    type="number" 
-                    value={guess} 
-                    onChange={handleGuessChange} 
-                    placeholder="Enter your guess" 
+                <input
+                    type="number"
+                    value={guess}
+                    onChange={handleGuessChange}
+                    placeholder="Enter your guess"
                 />
                 <button type="submit">Guess</button>
                 <button type="button" onClick={handleReset}>Reset</button>

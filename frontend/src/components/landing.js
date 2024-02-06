@@ -20,7 +20,7 @@ const handleGuessChange = (event) => {
 };
 
 return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} style={{display: 'flex'}}>
         <input 
         value={name} 
         onChange={handleGuessChange} 
