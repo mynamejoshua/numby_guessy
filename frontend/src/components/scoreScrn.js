@@ -33,9 +33,9 @@ export default function ScoreTable() {
 			const records = await response.json();
 			setRecords(records);
 		}
-		getRecords();
-		return;
+		getRecords().catch(()=> alert("in catch"));
 	}, [records.length]);
+
 	// This method will delete a record
 	async function deleteRecord(id) {
 		await fetch(`http://localhost:5000/${id}`, {
@@ -44,6 +44,7 @@ export default function ScoreTable() {
 		const newRecords = records.filter((el) => el._id !== id);
 		setRecords(newRecords);
 	}
+
 	// This method will map out the records on the table
 	function recordList() {
 		return records.map((record) => {

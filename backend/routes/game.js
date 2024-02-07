@@ -38,11 +38,12 @@ function PostScore(name) {
     let db_connect = dbo.getDb();
    
     let myobj = {
-        name: playerState[name].name,
-        timeTaken: playerState[name].startTime - new Date(),
+        name: name,
+        timeTaken: (new Date() -  playerState[name].startTime) / 1000,
         guesses: playerState[name].guesses,
-        guessRange: playerState[name].guessRange,
+        guessRange: playerState[name].range,
     };
+    console.log(myobj.timeTaken);
 
     db_connect.collection("scores").insertOne(myobj, function (err, res) {
     if (err) throw err;
@@ -55,8 +56,9 @@ gameRoutes.route("/guess").post(async function (req, response) {
     const name = req.body.name;
     playerState[name].guesses += 1;
 
-    if(playerState[name].guesses === 1) {
+    if(parseInt(playerState[name].guesses) === 1) {
         playerState[name].startTime = new Date();
+        console.log("setting time: " + playerState[name].startTime)
     }
 
     const guess = req.body.guess;
@@ -109,7 +111,7 @@ gameRoutes.route("/scores/add").post(function (req, response) {
 
 gameRoutes.route("/scores").get(async function (req, response) {
     let db_connect = dbo.getDb();
-    console.log("in beefpack");
+    console.log("in da pack");
 
     db_connect
         .collection("scores")

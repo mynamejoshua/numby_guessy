@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 async function FetchRange(name) {
@@ -11,16 +11,11 @@ async function FetchRange(name) {
         })
         .catch(error => {
             window.alert(error);
-            return;
         });
 
-    if (response.ok) {
-        const data = await response.json();
-        console.log(data.range)
-        return data.range;
-    } else {
-        return [0, 25];
-    }
+    const data = await response.json();
+    console.log(data.range)
+    return data.range;
 }
 
 async function FetchGuessStatus(name, guess){
@@ -35,14 +30,9 @@ async function FetchGuessStatus(name, guess){
             window.alert(error);
             return;
         });
-
-    if (response.ok) {
-        const data = await response.json();
-        alert(data.message + data.winner);
-        return {message: data.message, winner: data.winner};
-    } else {
-        alert("fetchGuessStatus errro");
-    }
+    
+    const data = await response.json();
+    return {message: data.message, winner: data.winner};
 }
 
 function GameStats({ name, guesses, timeTaken, range }) {
@@ -70,8 +60,8 @@ function MessageStack({ messages }) {
 export default function Game() {
     const navigate = useNavigate();
     // w3schools said use location
-    // const userName = useLocation().state?.userName || null;
-    const userName = "joe";
+    const userName = useLocation().state?.userName || null;
+    // const userName = "joe";
 
     // set up state
     const [guess, setGuess] = useState('');
@@ -98,8 +88,9 @@ export default function Game() {
     };
 
     const handleSubmit = async (event) => { // might need async here
+        event.preventDefault(); // dont triger rerender
+
         let status = await FetchGuessStatus(userName, guess);
-        alert(status.winner + status.message);
         if (status.winner === true) {
             alert("game over?");
             setGameOver(true);
