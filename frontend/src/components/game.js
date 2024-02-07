@@ -58,7 +58,6 @@ export default function Game() {
     const [messages, setMessages] = useState([""]);
     const [targetNum, setTargetNum] = useState(0);
     const [stats, setStats] = useState({ guessRange: [0, 50], guesses: 0, initialTime: 0, timeTaken: -1, gameOver: false });
-    const statsRef = useRef(stats);
 
     const handleReset = async () => {
         let range = await FetchRange();
@@ -69,11 +68,6 @@ export default function Game() {
         setMessages(["".concat("Guess a number between ", range[0], " and ", range[1])]);
         setGuess('');
     };
-
-    // apearantly I need to watch my stats because the could be closed over
-    useEffect(() => {
-        statsRef.current = stats;
-    }, [stats]);
 
     // https://devtrium.com/posts/async-functions-useeffect
     useEffect(() => { // cant use async here so i make a new function and call it imideately
@@ -87,10 +81,10 @@ export default function Game() {
 
     const handleSubmit = (event) => { // might need async here
         event.preventDefault();
-        if (statsRef.current.gameOver === true) return;
-        if (!statsRef.current.initialTime) statsRef.current.initialTime = new Date(); // on first guess set inital time
+        if (stats.gameOver === true) return;
+        if (!stats.initialTime) stats.initialTime = new Date(); // on first guess set inital time
 
-        let updatedStats = { ...statsRef.current };
+        let updatedStats = { ...stats };
         let message = "";
         updatedStats.guesses += 1;
 
@@ -104,7 +98,7 @@ export default function Game() {
         } else if (parseInt(guess) === targetNum) {
             message = "correct";
             const endTime = new Date();
-            updatedStats.timeTaken = (endTime - statsRef.current.initialTime) / 1000;
+            updatedStats.timeTaken = (endTime - stats.initialTime) / 1000;
             updatedStats.gameOver = true;
             updatedStats.name = userName;
             PostScore(updatedStats);
