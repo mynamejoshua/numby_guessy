@@ -10,7 +10,7 @@ export default function Navbar() {
     return (
         <nav style={{display: "flex"}}>
                 <NavLink to="/">Home</NavLink><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                <NavLink to="/game">Game</NavLink><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                {/* <NavLink to="/game">Game</NavLink><span>&nbsp;&nbsp;&nbsp;&nbsp;</span> */}
                 <NavLink to="/score">Score</NavLink>
         </nav>
     )

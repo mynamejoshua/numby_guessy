@@ -24,7 +24,7 @@ return (
         <input 
         value={name} 
         onChange={handleGuessChange} 
-        placeholder="enter yor name" 
+        placeholder="enter your name" 
         />
         <button type="submit">Play!</button>
     </form>
