@@ -26,7 +26,8 @@ gameRoutes.route("/range").post(async function (req, response) {
     const targ = Math.floor(Math.random() * range[1]);
 
     console.log("name: " + name);
-
+    console.log("range: " + range[0] + "-" + range[1]);
+    console.log("targ: " + targ + "\n");
     playerState[name].range = range;
     playerState[name].target = targ;
     playerState[name].guesses = 0;
@@ -34,17 +35,8 @@ gameRoutes.route("/range").post(async function (req, response) {
     response.json({range: range});  
 });
 
-function PostScore(name) {
+function PostScore(myobj) {
     let db_connect = dbo.getDb();
-   
-    let myobj = {
-        name: name,
-        timeTaken: (new Date() -  playerState[name].startTime) / 1000,
-        guesses: playerState[name].guesses,
-        guessRange: playerState[name].range,
-    };
-    console.log(myobj.timeTaken);
-
     db_connect.collection("scores").insertOne(myobj, function (err, res) {
     if (err) throw err;
         response.json(res);
@@ -64,12 +56,9 @@ gameRoutes.route("/guess").post(async function (req, response) {
     const guess = req.body.guess;
     const targetNum = playerState[name].target;
 
-    console.log("in guess rout");
-    console.log("guess: ", guess);
-    console.log("targetNum: ", targetNum);
-
     let msgStr = "";
     let win = false;
+    let gameData = {};    
 
     if (guess > targetNum) {
         msgStr = "lower than " + guess;
@@ -78,7 +67,16 @@ gameRoutes.route("/guess").post(async function (req, response) {
     } else if (parseInt(guess) === targetNum) {
         msgStr = "correct! " + guess + " " + targetNum;
         win = true;
-        PostScore(req.body.name);
+
+        let myobj = {
+            name: name,
+            timeTaken: (new Date() -  playerState[name].startTime) / 1000,
+            guesses: playerState[name].guesses,
+            guessRange: playerState[name].range,
+        };
+
+	    PostScore(myobj);
+        gameData = myobj;
         // reset score
 
     } else {
@@ -87,31 +85,31 @@ gameRoutes.route("/guess").post(async function (req, response) {
     
     console.log("msgStr: ", msgStr);
     console.log("win: ", win);
-    response.json({message: msgStr, winner: win});
+    response.json({message: msgStr, winner: win, gameData: gameData});
 });
 
-// This section will help you create a new record.
-gameRoutes.route("/scores/add").post(function (req, response) {
+// // This section will help you create a new record.
+// gameRoutes.route("/scores/add").post(function (req, response) {
 
-    let db_connect = dbo.getDb();
+//     let db_connect = dbo.getDb();
    
-    let myobj = {
-        name: req.body.name,
-        timeTaken: req.body.timeTaken,
-        guesses: req.body.guesses,
-        guessRange: req.body.guessRange,
-    };
+//     let myobj = {
+//         name: req.body.name,
+//         timeTaken: req.body.timeTaken,
+//         guesses: req.body.guesses,
+//         guessRange: req.body.guessRange,
+//     };
 
-    db_connect.collection("scores").insertOne(myobj, function (err, res) {
-    if (err) throw err;
-        response.json(res);
-        console.log("added record");
-    });
-});
+//     db_connect.collection("scores").insertOne(myobj, function (err, res) {
+//     if (err) throw err;
+//         response.json(res);
+//         console.log("added record");
+//     });
+// });
 
 gameRoutes.route("/scores").get(async function (req, response) {
     let db_connect = dbo.getDb();
-    console.log("in da pack");
+    console.log("sending scores...\n");
 
     db_connect
         .collection("scores")

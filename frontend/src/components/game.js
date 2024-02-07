@@ -14,7 +14,6 @@ async function FetchRange(name) {
         });
 
     const data = await response.json();
-    console.log(data.range)
     return data.range;
 }
 
@@ -32,7 +31,7 @@ async function FetchGuessStatus(name, guess){
         });
     
     const data = await response.json();
-    return {message: data.message, winner: data.winner};
+    return {message: data.message, winner: data.winner, gameData: data.gameData};
 }
 
 function GameStats({ name, guesses, timeTaken, range }) {
@@ -67,10 +66,10 @@ export default function Game() {
     const [guess, setGuess] = useState('');
     const [messages, setMessages] = useState([""]);
     const [gameOver, setGameOver] = useState(false);
-    const [stats, setStats] = useState({ guessRange: [0, 50], guesses: 0, initialTime: 0, timeTaken: -1});
+    const [stats, setStats] = useState({ guessRange: [0, 50], guesses: 0, timeTaken: -1});
     
     const handleReset = async () => {
-        let range = await FetchRange(userName);
+        let range = await FetchRange(userName).catch();
         setStats({ guessRange: range, guesses: 0, initialTime: null, timeTaken: -1});
         setMessages(["".concat("Guess a number between ", range[0], " and ", range[1])]);
         setGuess('');
@@ -80,7 +79,7 @@ export default function Game() {
     // https://devtrium.com/posts/async-functions-useeffect
     useEffect(() => { // cant use async here so i make a new function and call it imideately
         if (!userName) { navigate("/"); } // make sure that a user name has been entered
-        handleReset().catch(console.error);
+        handleReset().catch()
     }, []);
 
     const handleGuessChange = (event) => {
@@ -92,8 +91,8 @@ export default function Game() {
 
         let status = await FetchGuessStatus(userName, guess);
         if (status.winner === true) {
-            alert("game over?");
             setGameOver(true);
+	        setStats({ guessRange: status.gameData.guessRange, guesses: status.gameData.guesses, timeTaken: status.gameData.timeTaken});
         } else {
 
         }
