@@ -1,16 +1,4 @@
-// import React from "react";
-
-// export default function ScoreTable() {
-//     return (
-//         <div>
-//             ScoreTable goes here
-//         </div>
-//     )
-// }
-
-
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 const Record = (props) => (
 	<tr>
@@ -30,6 +18,7 @@ const Record = (props) => (
 		</td>
 	</tr>
 );
+
 export default function ScoreTable() {
 	const [records, setRecords] = useState([]);
 	// This method fetches the records from the database.
@@ -67,6 +56,7 @@ export default function ScoreTable() {
 			);
 		});
 	}
+	
 	// This following section will display the table with the records of individuals.
 	return (
 		<div>

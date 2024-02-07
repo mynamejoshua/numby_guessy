@@ -1,8 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
-async function FetchRange() {
-    let response = await fetch("http://localhost:5000/range");
+async function FetchRange(name) {
+    let response = await fetch("http://localhost:5000/range", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({name: name}),
+        })
+        .catch(error => {
+            window.alert(error);
+            return;
+        });
+
     if (response.ok) {
         const data = await response.json();
         console.log(data.range)
@@ -12,19 +23,26 @@ async function FetchRange() {
     }
 }
 
-async function PostScore(stats) {
-    const newScore = { ...stats };
-    await fetch("http://localhost:5000/scores/add", {
+async function FetchGuessStatus(name, guess){
+    let response = await fetch("http://localhost:5000/guess", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(newScore),
-    })
+        body: JSON.stringify({name: name, guess: guess}),
+        })
         .catch(error => {
             window.alert(error);
             return;
         });
+
+    if (response.ok) {
+        const data = await response.json();
+        alert(data.message + data.winner);
+        return {message: data.message, winner: data.winner};
+    } else {
+        alert("fetchGuessStatus errro");
+    }
 }
 
 function GameStats({ name, guesses, timeTaken, range }) {
@@ -51,22 +69,22 @@ function MessageStack({ messages }) {
 
 export default function Game() {
     const navigate = useNavigate();
-    const userName = useLocation().state?.userName || null;
+    // w3schools said use location
+    // const userName = useLocation().state?.userName || null;
+    const userName = "joe";
 
     // set up state
     const [guess, setGuess] = useState('');
     const [messages, setMessages] = useState([""]);
-    const [targetNum, setTargetNum] = useState(0);
-    const [stats, setStats] = useState({ guessRange: [0, 50], guesses: 0, initialTime: 0, timeTaken: -1, gameOver: false });
-
+    const [gameOver, setGameOver] = useState(false);
+    const [stats, setStats] = useState({ guessRange: [0, 50], guesses: 0, initialTime: 0, timeTaken: -1});
+    
     const handleReset = async () => {
-        let range = await FetchRange();
-        let targ = Math.floor(Math.random() * parseInt(range[1]));
-
-        setStats({ guessRange: range, guesses: 0, initialTime: null, timeTaken: -1, gameOver: false });
-        setTargetNum(targ);
+        let range = await FetchRange(userName);
+        setStats({ guessRange: range, guesses: 0, initialTime: null, timeTaken: -1});
         setMessages(["".concat("Guess a number between ", range[0], " and ", range[1])]);
         setGuess('');
+        setGameOver(false);
     };
 
     // https://devtrium.com/posts/async-functions-useeffect
@@ -79,36 +97,17 @@ export default function Game() {
         setGuess(event.target.value);
     };
 
-    const handleSubmit = (event) => { // might need async here
-        event.preventDefault();
-        if (stats.gameOver === true) return;
-        if (!stats.initialTime) stats.initialTime = new Date(); // on first guess set inital time
-
-        let updatedStats = { ...stats };
-        let message = "";
-        updatedStats.guesses += 1;
-
-        console.log("guess:", guess);
-        console.log("targ:", targetNum);
-
-        if (guess > targetNum) {
-            message = "lower than " + guess;
-        } else if (guess < targetNum) {
-            message = "higher than " + guess;
-        } else if (parseInt(guess) === targetNum) {
-            message = "correct";
-            const endTime = new Date();
-            updatedStats.timeTaken = (endTime - stats.initialTime) / 1000;
-            updatedStats.gameOver = true;
-            updatedStats.name = userName;
-            PostScore(updatedStats);
+    const handleSubmit = async (event) => { // might need async here
+        let status = await FetchGuessStatus(userName, guess);
+        alert(status.winner + status.message);
+        if (status.winner === true) {
+            alert("game over?");
+            setGameOver(true);
         } else {
-            return;
-        }
 
+        }
         // update gamestate
-        setStats(updatedStats);
-        setMessages([...messages, message]);
+        setMessages([...messages, status.message]);
         setGuess('');
     };
 
@@ -142,7 +141,7 @@ export default function Game() {
     return (
         <>
             <h2>Numby-Guessy Game</h2>
-            {stats.gameOver ? renderGameOver() : renderGamePlay()}
+            {gameOver ? renderGameOver() : renderGamePlay()}
         </>
     );
 }

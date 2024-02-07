@@ -10,11 +10,82 @@ const dbo = require("../db/conn");
  
 // This help convert the id from string to ObjectId for the _id.
 const ObjectId = require("mongodb").ObjectId;
- 
+
+let playerState = {}
+
 // https://www.mongodb.com/community/forums/t/solved-mern-tutorial-issue-cannot-read-properties-of-undefined-reading-collection/212521/2
-gameRoutes.route("/range").get(async function (req, response) {
-    let topnumber = Math.floor(Math.random() * 101) * 10;
-    response.json({range: [0, topnumber]});  
+gameRoutes.route("/range").post(async function (req, response) {
+    const name = req.body.name;
+
+    if (!playerState[name]) {
+        playerState[name] = {};
+    }
+
+    const topnumber = Math.floor(Math.random() * 101) * 10;
+    const range = [0, topnumber]
+    const targ = Math.floor(Math.random() * range[1]);
+
+    console.log("name: " + name);
+
+    playerState[name].range = range;
+    playerState[name].target = targ;
+    playerState[name].guesses = 0;
+
+    response.json({range: range});  
+});
+
+function PostScore(name) {
+    let db_connect = dbo.getDb();
+   
+    let myobj = {
+        name: playerState[name].name,
+        timeTaken: playerState[name].startTime - new Date(),
+        guesses: playerState[name].guesses,
+        guessRange: playerState[name].guessRange,
+    };
+
+    db_connect.collection("scores").insertOne(myobj, function (err, res) {
+    if (err) throw err;
+        response.json(res);
+        console.log("added record");
+    });
+}
+
+gameRoutes.route("/guess").post(async function (req, response) {
+    const name = req.body.name;
+    playerState[name].guesses += 1;
+
+    if(playerState[name].guesses === 1) {
+        playerState[name].startTime = new Date();
+    }
+
+    const guess = req.body.guess;
+    const targetNum = playerState[name].target;
+
+    console.log("in guess rout");
+    console.log("guess: ", guess);
+    console.log("targetNum: ", targetNum);
+
+    let msgStr = "";
+    let win = false;
+
+    if (guess > targetNum) {
+        msgStr = "lower than " + guess;
+    } else if (guess < targetNum) {
+        msgStr = "higher than " + guess;
+    } else if (parseInt(guess) === targetNum) {
+        msgStr = "correct! " + guess + " " + targetNum;
+        win = true;
+        PostScore(req.body.name);
+        // reset score
+
+    } else {
+        msgStr = "errr";
+    }
+    
+    console.log("msgStr: ", msgStr);
+    console.log("win: ", win);
+    response.json({message: msgStr, winner: win});
 });
 
 // This section will help you create a new record.
