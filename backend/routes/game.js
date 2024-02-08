@@ -17,19 +17,19 @@ let playerState = {}
 gameRoutes.route("/range").post(async function (req, response) {
     const name = req.body.name;
 
-    if (!playerState[name]) {
+    if (!playerState[name]) { // if player doesn't exist, make it exist
         playerState[name] = {};
     }
 
     const topnumber = Math.floor(Math.random() * 101) * 10;
     const range = [0, topnumber]
-    const targ = Math.floor(Math.random() * range[1]);
+    const target = Math.floor(Math.random() * range[1]);
 
     console.log("name: " + name);
     console.log("range: " + range[0] + "-" + range[1]);
-    console.log("targ: " + targ + "\n");
+    console.log("targ: " + target + "\n");
     playerState[name].range = range;
-    playerState[name].target = targ;
+    playerState[name].target = target;
     playerState[name].guesses = 0;
 
     response.json({range: range});  
@@ -77,7 +77,7 @@ gameRoutes.route("/guess").post(async function (req, response) {
 
 	    PostScore(myobj);
         gameData = myobj;
-        // reset score
+        playerState[name] = {}; // reset player
 
     } else {
         msgStr = "errr";
@@ -87,25 +87,6 @@ gameRoutes.route("/guess").post(async function (req, response) {
     console.log("win: ", win);
     response.json({message: msgStr, winner: win, gameData: gameData});
 });
-
-// // This section will help you create a new record.
-// gameRoutes.route("/scores/add").post(function (req, response) {
-
-//     let db_connect = dbo.getDb();
-   
-//     let myobj = {
-//         name: req.body.name,
-//         timeTaken: req.body.timeTaken,
-//         guesses: req.body.guesses,
-//         guessRange: req.body.guessRange,
-//     };
-
-//     db_connect.collection("scores").insertOne(myobj, function (err, res) {
-//     if (err) throw err;
-//         response.json(res);
-//         console.log("added record");
-//     });
-// });
 
 gameRoutes.route("/scores").get(async function (req, response) {
     let db_connect = dbo.getDb();
