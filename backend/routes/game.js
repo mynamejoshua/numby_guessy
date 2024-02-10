@@ -21,9 +21,10 @@ gameRoutes.route("/range").post(async function (req, response) {
         playerState[name] = {};
     }
 
-    const topnumber = Math.floor(Math.random() * 101) * 10;
+    // const topnumber = Math.floor(Math.random() * 101) * 10;
+    const topnumber = 100; 
     const range = [0, topnumber]
-    const target = Math.floor(Math.random() * range[1]);
+    const target = Math.floor(Math.random() * range[1] + 1);
 
     console.log("name: " + name);
     console.log("range: " + range[0] + "-" + range[1]);
@@ -101,6 +102,11 @@ gameRoutes.route("/scores").get(async function (req, response) {
         });
   
 });
+
+gameRoutes.route("/a").post(async function (req, response) {
+    response.json({dog: req.body.dog});
+});
+
 
 // This section will help you delete a record
 gameRoutes.route("/:id").delete(async (req, response) => {

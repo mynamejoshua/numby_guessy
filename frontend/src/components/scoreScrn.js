@@ -21,6 +21,8 @@ const Record = (props) => (
 
 export default function ScoreTable() {
 	const [records, setRecords] = useState([]);
+
+
 	// This method fetches the records from the database.
 	useEffect(() => {
 		async function getRecords() {
@@ -33,7 +35,7 @@ export default function ScoreTable() {
 			const records = await response.json();
 			setRecords(records);
 		}
-		getRecords().catch(()=> alert("in catch"));
+		getRecords().catch(() => alert("in catch"));
 	}, [records.length]);
 
 	// This method will delete a record
@@ -47,6 +49,7 @@ export default function ScoreTable() {
 
 	// This method will map out the records on the table
 	function recordList() {
+
 		return records.map((record) => {
 			return (
 				<Record
@@ -57,18 +60,24 @@ export default function ScoreTable() {
 			);
 		});
 	}
-	
+
+	const HandleSort = (comparison) => {
+		// Create a new sorted array instead of sorting in place
+		const sortedRecords = [...records].sort(comparison);
+		setRecords(sortedRecords);
+	}
+
 	// This following section will display the table with the records of individuals.
 	return (
 		<div>
 			<h3>Record List</h3>
-			<table className="table table-striped" style={{ marginTop: 20 }}>
+			<table>
 				<thead>
 					<tr>
-						<th>Name</th>
-						<th>Time</th>
-						<th>Guesses</th>
-						<th>Range</th>
+						<th onClick={() => HandleSort((a, b) => a.name.localeCompare(b.name))}>Name</th>
+						<th onClick={() => HandleSort((a, b) => a.timeTaken - b.timeTaken)}>Time</th>
+						<th onClick={() => HandleSort((a, b) => a.guesses - b.guesses)}>Guesses</th>
+						<th onClick={() => HandleSort((a, b) => a.guessRange[1] - b.guessRange[1])}>Range</th>
 					</tr>
 				</thead>
 				<tbody>{recordList()}</tbody>
